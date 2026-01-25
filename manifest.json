@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "YouTube Script Copier",
+  "name": "YouTube Script Translator",
   "version": "1.1",
   "description": "YouTube 영상의 자막을 추출하고 번역합니다",
   "permissions": ["clipboardWrite", "storage"],

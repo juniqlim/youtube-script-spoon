@@ -1,4 +1,4 @@
-// YouTube Script Copier - Content Script
+// YouTube Script Translator - Content Script
 
 (function() {
   'use strict';
@@ -299,7 +299,7 @@
 
     } catch (e) {
       content.textContent = '오류: ' + e.message;
-      console.error('YouTube Script Copier:', e);
+      console.error('YouTube Script Translator:', e);
     }
   }
 
