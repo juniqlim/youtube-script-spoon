@@ -2,6 +2,17 @@
 
 YouTube 영상의 자막을 추출하고 번역하는 크롬 확장 프로그램
 
+## 스크린샷
+
+### 원본 스크립트
+![원본 스크립트](screenshots/original.png)
+
+### 번역 결과
+![번역 결과](screenshots/translated.png)
+
+### 설정
+![설정](screenshots/settings.png)
+
 ## 설치
 
 1. `chrome://extensions` 접속
