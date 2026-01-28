@@ -9,39 +9,34 @@
   let translatedText = '';
   let isShowingTranslation = false;
 
-  // InnerTube API로 자막 트랙 가져오기 (재시도 포함)
-  async function getCaptionTracks(videoId, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-      const res = await fetch('https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8', {
+  // ANDROID 클라이언트로 InnerTube API 호출하여 자막 트랙 가져오기
+  async function getCaptionTracks(videoId) {
+    try {
+      // 페이지에서 API 키 추출
+      const html = document.documentElement.innerHTML;
+      const apiKeyMatch = html.match(/"INNERTUBE_API_KEY":\s*"([a-zA-Z0-9_-]+)"/);
+      if (!apiKeyMatch) {
+        console.error('API 키를 찾을 수 없음');
+        return [];
+      }
+      const apiKey = apiKeyMatch[1];
+
+      // ANDROID 클라이언트로 요청 (exp=xpe 파라미터가 없는 URL을 받음)
+      const res = await fetch(`https://www.youtube.com/youtubei/v1/player?key=${apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          videoId: videoId,
-          context: {
-            client: {
-              clientName: 'WEB',
-              clientVersion: '2.20240101.00.00',
-              hl: 'en',
-              gl: 'US'
-            }
-          }
+          context: { client: { clientName: 'ANDROID', clientVersion: '20.10.38' } },
+          videoId: videoId
         })
       });
 
       const data = await res.json();
-      const tracks = data?.captions?.playerCaptionsTracklistRenderer?.captionTracks;
-
-      if (tracks && tracks.length > 0) {
-        return tracks;
-      }
-
-      // 재시도 전 대기
-      if (i < retries - 1) {
-        await new Promise(r => setTimeout(r, 500));
-      }
+      return data?.captions?.playerCaptionsTracklistRenderer?.captionTracks || [];
+    } catch (e) {
+      console.error('자막 트랙 가져오기 실패:', e);
+      return [];
     }
-
-    return [];
   }
 
   // 자막 트랙 선택 (원어 우선)
@@ -282,12 +277,14 @@
 
       // 원어(수동) 자막 우선 선택
       const track = selectBestTrack(tracks);
-      const langName = track.name?.simpleText || track.languageCode;
+      const langName = track.name?.runs?.[0]?.text || track.name?.simpleText || track.languageCode;
       const isAuto = track.kind === 'asr' ? ' (자동생성)' : '';
 
       content.textContent = `자막 로딩중... (${langName}${isAuto})`;
 
-      currentTranscript = await fetchTranscript(track.baseUrl);
+      // fmt=srv3 제거 (XML 형식으로 받기 위해)
+      const captionUrl = track.baseUrl.replace('&fmt=srv3', '');
+      currentTranscript = await fetchTranscript(captionUrl);
 
       if (currentTranscript.length === 0) {
         content.textContent = '자막을 가져올 수 없습니다.';
