@@ -344,8 +344,12 @@
   // 클립보드 복사
   async function copyToClipboard() {
     const content = document.getElementById('yt-script-content');
+    const segmentTexts = content.querySelectorAll('.yt-script-segment-text');
+    const text = segmentTexts.length > 0
+      ? Array.from(segmentTexts).map(el => el.textContent).join('\n')
+      : content.textContent;
     try {
-      await navigator.clipboard.writeText(content.textContent);
+      await navigator.clipboard.writeText(text);
       const btn = document.getElementById('yt-script-copy');
       btn.textContent = '복사됨!';
       setTimeout(() => btn.textContent = '복사', 1500);
