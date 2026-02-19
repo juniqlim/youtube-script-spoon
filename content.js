@@ -134,7 +134,7 @@
       <div class="yt-script-header">
         <span>스크립트</span>
         <div class="yt-script-controls">
-          <label><input type="checkbox" id="yt-script-timestamp"> 타임스탬프</label>
+          <label><input type="checkbox" id="yt-script-timestamp" checked> 타임스탬프</label>
           <button id="yt-script-copy">복사</button>
           <button id="yt-script-close">✕</button>
         </div>
@@ -260,6 +260,17 @@
     // 버튼 상태 초기화
     document.getElementById('yt-script-original').classList.add('active');
     document.getElementById('yt-script-translate').classList.remove('active');
+
+    // API 키 없으면 번역 버튼 비활성화
+    const { geminiApiKey } = await chrome.storage.sync.get(['geminiApiKey']);
+    const translateBtn = document.getElementById('yt-script-translate');
+    if (!geminiApiKey) {
+      translateBtn.disabled = true;
+      translateBtn.title = 'Gemini API 키를 설정에서 입력하세요';
+    } else {
+      translateBtn.disabled = false;
+      translateBtn.title = '';
+    }
 
     try {
       const videoId = new URLSearchParams(location.search).get('v');
