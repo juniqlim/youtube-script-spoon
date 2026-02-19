@@ -355,6 +355,45 @@
     };
     tryInsert();
 
+    // 단축키로 원본 복사
+    let copyShortcut = { ctrl: true, shift: true, key: 'C' };
+    chrome.storage.sync.get(['copyShortcut'], (result) => {
+      if (result.copyShortcut) copyShortcut = result.copyShortcut;
+    });
+    chrome.storage.onChanged.addListener((changes) => {
+      if (changes.copyShortcut) copyShortcut = changes.copyShortcut.newValue;
+    });
+    document.addEventListener('keydown', async (e) => {
+      const ctrlOrMeta = e.ctrlKey || e.metaKey;
+      const keyCode = 'Key' + copyShortcut.key.toUpperCase();
+      if (ctrlOrMeta === !!copyShortcut.ctrl &&
+          e.shiftKey === !!copyShortcut.shift &&
+          e.altKey === !!copyShortcut.alt &&
+          e.code === keyCode) {
+        e.preventDefault();
+        if (originalText) {
+          navigator.clipboard.writeText(originalText).then(() => {
+            const btn = document.getElementById('yt-script-copy');
+            if (btn) {
+              btn.textContent = '복사됨!';
+              setTimeout(() => btn.textContent = '복사', 1500);
+            }
+          });
+        } else {
+          await loadScript();
+          if (originalText) {
+            navigator.clipboard.writeText(originalText).then(() => {
+              const btn = document.getElementById('yt-script-copy');
+              if (btn) {
+                btn.textContent = '복사됨!';
+                setTimeout(() => btn.textContent = '복사', 1500);
+              }
+            });
+          }
+        }
+      }
+    });
+
     // YouTube SPA 네비게이션 감지 (yt-navigate-finish 이벤트 사용)
     window.addEventListener('yt-navigate-finish', () => {
       if (panel) panel.style.display = 'none';
