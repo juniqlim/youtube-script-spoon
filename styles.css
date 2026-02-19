@@ -1,10 +1,10 @@
 /* 사이드바 버튼 */
-#yt-script-btn-container {
+.yt-script-btn-container {
   padding: 12px;
   margin-bottom: 12px;
 }
 
-#yt-script-btn-sidebar {
+.yt-script-btn-sidebar {
   width: 100%;
   padding: 10px 16px;
   background: #065fd4;
@@ -16,8 +16,19 @@
   cursor: pointer;
 }
 
-#yt-script-btn-sidebar:hover {
+.yt-script-btn-sidebar:hover {
   background: #0056b3;
+}
+
+/* 좁은 화면: 사이드바 버튼 숨기고 아래 버튼 표시 */
+#secondary .yt-script-btn-container { display: block; }
+#secondary-inner .yt-script-btn-container { display: block; }
+#below > .yt-script-btn-container { display: none; }
+
+@media (max-width: 1015px) {
+  #secondary .yt-script-btn-container,
+  #secondary-inner .yt-script-btn-container { display: none; }
+  #below > .yt-script-btn-container { display: block; }
 }
 
 /* 스크립트 패널 */

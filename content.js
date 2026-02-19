@@ -300,25 +300,39 @@
     }
   }
 
-  // 사이드바에 버튼 삽입
+  // 버튼 요소 생성
+  function createButtonContainer() {
+    const container = document.createElement('div');
+    container.className = 'yt-script-btn-container';
+
+    const btn = document.createElement('button');
+    btn.className = 'yt-script-btn-sidebar';
+    btn.textContent = '📜 스크립트 보기';
+    btn.onclick = loadScript;
+
+    container.appendChild(btn);
+    return container;
+  }
+
+  // 버튼 삽입 (사이드바 + 영상 아래 둘 다)
   function insertButton() {
-    if (document.getElementById('yt-script-btn-container')) return true;
+    let inserted = false;
 
+    // 사이드바 (넓은 화면)
     const secondary = document.querySelector('#secondary-inner, #secondary');
-    if (secondary) {
-      const container = document.createElement('div');
-      container.id = 'yt-script-btn-container';
-
-      const btn = document.createElement('button');
-      btn.id = 'yt-script-btn-sidebar';
-      btn.textContent = '📜 스크립트 보기';
-      btn.onclick = loadScript;
-
-      container.appendChild(btn);
-      secondary.insertBefore(container, secondary.firstChild);
-      return true;
+    if (secondary && !secondary.querySelector('.yt-script-btn-container')) {
+      secondary.insertBefore(createButtonContainer(), secondary.firstChild);
+      inserted = true;
     }
-    return false;
+
+    // 영상 아래 (좁은 화면)
+    const below = document.querySelector('#below');
+    if (below && !below.querySelector(':scope > .yt-script-btn-container')) {
+      below.insertBefore(createButtonContainer(), below.firstChild);
+      inserted = true;
+    }
+
+    return inserted || !!document.querySelector('.yt-script-btn-container');
   }
 
   // 초기화
@@ -330,20 +344,15 @@
     };
     tryInsert();
 
-    // YouTube SPA 네비게이션 감지
-    let lastUrl = location.href;
-    new MutationObserver(() => {
-      if (location.href !== lastUrl) {
-        lastUrl = location.href;
-        if (panel) panel.style.display = 'none';
-        currentTranscript = [];
-        originalText = '';
-        translatedText = '';
-        const oldContainer = document.getElementById('yt-script-btn-container');
-        if (oldContainer) oldContainer.remove();
-        setTimeout(tryInsert, 1000);
-      }
-    }).observe(document.body, { subtree: true, childList: true });
+    // YouTube SPA 네비게이션 감지 (yt-navigate-finish 이벤트 사용)
+    window.addEventListener('yt-navigate-finish', () => {
+      if (panel) panel.style.display = 'none';
+      currentTranscript = [];
+      originalText = '';
+      translatedText = '';
+      document.querySelectorAll('.yt-script-btn-container').forEach(el => el.remove());
+      tryInsert();
+    });
   }
 
   if (document.readyState === 'loading') {
