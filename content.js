@@ -469,6 +469,14 @@
     };
     tryInsert();
 
+    // DOM 변경 감시: YouTube가 #secondary-inner를 재구성하면 버튼 재삽입
+    const observer = new MutationObserver(() => {
+      if (!document.querySelector('.yt-script-btn-container')) {
+        insertButton();
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
     // 단축키로 원본 복사
     let copyShortcut = { ctrl: true, shift: true, key: 'C' };
     chrome.storage.sync.get(['copyShortcut'], (result) => {
